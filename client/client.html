@@ -5,6 +5,77 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+  const handleResponse = async (response) => {
+      
+    const content = document.querySelector('#content');
+
+    switch(response.status) {
+      case 200:
+        content.innerHTML = `<b>Success</b>`;
+        break;
+      case 201: 
+        content.innerHTML = '<b>Created</b>';
+        break;
+      case 204:
+        content.innerHTML = '<b>Updated (No Content)</b>';
+        return;
+      case 400:
+        content.innerHTML = `<b>Bad Request</b>`;
+        break;
+      default:
+        content.innerHTML = `Error code not implemented by client.`;
+          break;
+    }
+
+    let obj = await response.json();
+
+    if(obj.message){
+      content.innerHTML += `<p>${obj.message}</p>`;
+    }
+  };
+
+  const sendPost = async (nameForm) => {
+
+    const nameAction = nameForm.getAttribute('action');
+    const nameMethod = nameForm.getAttribute('method');
+      
+    const nameField = nameForm.querySelector('#nameField');
+    const ageField = nameForm.querySelector('#ageField');
+
+    const formData = `name=${nameField.value}&age=${ageField.value}`;
+
+    let response = await fetch(nameAction, {
+      method: nameMethod,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: formData,
+    });
+
+    handleResponse(response);
+  };
+  
+  const init = () => {
+    const nameForm = document.querySelector('#nameForm');
+      
+    const addUser = (e) => {
+      e.preventDefault();
+      sendPost(nameForm);
+      return false;
+    }
+
+    const getUser = (e) => {
+      e.preventDefault();
+      sendPost(nameForm);
+      return false;
+    }
+      
+    nameForm.addEventListener('submit', addUser);
+    nameForm.addEventListener('submit', getUser);
+  };
+
+  window.onload = init;
 
   </script>
 </head>
