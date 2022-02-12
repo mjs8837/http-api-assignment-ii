@@ -5,7 +5,7 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
-  const handleResponse = async (response) => {
+  const handleResponse = async (response, parseResponse) => {
       
     const content = document.querySelector('#content');
 
@@ -23,14 +23,14 @@
         content.innerHTML = `<b>Bad Request</b>`;
         break;
       default:
-        content.innerHTML = `Error code not implemented by client.`;
+        content.innerHTML = `<b>Not Found</b>`;
           break;
     }
 
-    let obj = await response.json();
-
-    if(obj.message){
-      content.innerHTML += `<p>${obj.message}</p>`;
+    if (parseResponse) {
+      let obj = await response.json();  
+      console.log(obj);
+      content.innerHTML += `<p>${JSON.stringify(obj.users) || 'Message: ' + JSON.stringify(obj.message)}</p>`;
     }
   };
 
@@ -53,11 +53,27 @@
       body: formData,
     });
 
-    handleResponse(response);
+    handleResponse(response, nameMethod === 'post');
+  };
+
+  const sendGet = async (userForm) => {
+    const url = document.querySelector('#urlField').value;
+    const method = document.querySelector('#methodSelect').value;
+
+    let response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    });
+
+    handleResponse(response, method === 'get');
   };
   
   const init = () => {
     const nameForm = document.querySelector('#nameForm');
+    const userForm = document.querySelector('#userForm');
       
     const addUser = (e) => {
       e.preventDefault();
@@ -67,12 +83,12 @@
 
     const getUser = (e) => {
       e.preventDefault();
-      sendPost(nameForm);
+      sendGet(userForm);
       return false;
     }
       
     nameForm.addEventListener('submit', addUser);
-    nameForm.addEventListener('submit', getUser);
+    userForm.addEventListener('submit', getUser);
   };
 
   window.onload = init;
